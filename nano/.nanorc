@@ -1,0 +1,34 @@
+# Settings for `nano` editor
+# Full list of settings might be shown via `man nano`
+# or here: https://www.nano-editor.org/dist/v3/nanorc.5.html
+
+# Editor:
+set tabstospaces
+set tabsize 2
+set trimblanks
+set mouse
+set autoindent
+
+set softwrap
+set atblanks
+set constantshow
+set boldtext
+
+unset casesensitive
+set regexp
+
+
+# line numbers are copied with text,
+# it is not useful:
+# set linenumbers
+
+# Syntax highlight:
+include /usr/share/nano/*.nanorc
+include /usr/share/nano/extra/*.nanorc
+
+# Custom keybinds
+bind ^z undo main
+bind ^y redo main
+bind ^f whereis main
+bind ^b paste main
+bind ^c copy main
