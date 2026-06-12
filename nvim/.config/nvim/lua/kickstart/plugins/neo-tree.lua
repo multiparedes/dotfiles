@@ -17,16 +17,6 @@ return {
   },
   config = function(_, opts)
     require('neo-tree').setup(opts)
-    vim.api.nvim_create_autocmd('VimEnter', {
-      callback = function()
-        local arg = vim.fn.argv(0)
-        if type(arg) == 'string' and vim.fn.isdirectory(arg) == 1 then
-          vim.schedule(function()
-            vim.cmd('Neotree focus dir=' .. vim.fn.fnameescape(arg))
-          end)
-        end
-      end,
-    })
   end,
   opts = {
     filesystem = {

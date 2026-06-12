@@ -256,6 +256,11 @@ alias wifi='nmtui'
 export PATH=/home/marti/.opencode/bin:$PATH
 alias oc='opencode'
 
+alias svim="sudo $(which nvim)"
+
+alias od="cd /home/marti/AI/open-design && pnpm tools-dev"
+alias opendesign="cd /home/marti/AI/open-design && pnpm tools-dev"
+
 admin() {
   if [[ -z "$KITTY_WINDOW_ID" ]]; then kitty --session ~/.config/kitty/sessions/admin.session; return; fi
   kitten @ launch --location vsplit --cwd ~/Proyectos/tesela-admin zsh -i -c 'source ~/.nvm/nvm.sh && runloop nr dev'
