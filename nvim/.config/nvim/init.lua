@@ -179,15 +179,15 @@ vim.o.shiftwidth = 2
 vim.o.softtabstop = 2
 -- vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = 'Go to definition' })
 
-vim.keymap.set('n', 'L', '<Cmd>BufferNext<CR>',     { silent = true })
-vim.keymap.set('n', 'H', '<Cmd>BufferPrevious<CR>', { silent = true })
+vim.keymap.set('n', 'L', '<Cmd>bnext<CR>',     { silent = true })
+vim.keymap.set('n', 'H', '<Cmd>bprevious<CR>', { silent = true })
 
 -- [[ Basic Keymaps ]]
 --  See `:help vim.keymap.set()`
 
 -- Clear highlights on search when pressing <Esc> in normal mode
 --  See `:help hlsearch`
-vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
+vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<bar>redrawstatus<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })

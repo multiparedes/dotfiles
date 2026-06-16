@@ -14,16 +14,83 @@ return {
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
       local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = vim.g.have_nerd_font }
 
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
+      -- Statusline highlight colors (kept across colorscheme reloads).
+      local function set_stl_hl()
+        vim.api.nvim_set_hl(0, 'StlFile', { fg = '#abb2bf', bold = true })
+        vim.api.nvim_set_hl(0, 'StlModified', { fg = '#e5a05a' }) -- orange unsaved indicator
+        local gitbg = '#16191f' -- darker background block for the git section
+        vim.api.nvim_set_hl(0, 'StlBranch', { fg = '#98c379', bg = gitbg }) -- starter green
+        vim.api.nvim_set_hl(0, 'StlSep', { fg = '#3b4048', bg = gitbg }) -- separator (git block)
+        vim.api.nvim_set_hl(0, 'StlSepDim', { fg = '#3b4048' }) -- separator (no bg)
+        vim.api.nvim_set_hl(0, 'StlAdd', { fg = '#98c379', bg = gitbg })
+        vim.api.nvim_set_hl(0, 'StlChange', { fg = '#e5c07b', bg = gitbg })
+        vim.api.nvim_set_hl(0, 'StlDelete', { fg = '#e06c75', bg = gitbg })
       end
+      set_stl_hl()
+      vim.api.nvim_create_autocmd('ColorScheme', { callback = set_stl_hl })
+
+      -- Right side: git branch + per-file diff counts, each its own color.
+      local function git_right()
+        local d = vim.b.gitsigns_status_dict
+        if not d then
+          return ''
+        end
+        local branch = ''
+        if d.head and d.head ~= '' then
+          -- U+E725 nf-dev-git_branch (Nerd Font)
+          branch = '%#StlBranch#  ' .. vim.fn.nr2char(0xe725) .. ' ' .. d.head
+        end
+        local diff = {}
+        if (d.added or 0) > 0 then
+          diff[#diff + 1] = '%#StlAdd#+' .. d.added
+        end
+        if (d.changed or 0) > 0 then
+          diff[#diff + 1] = '%#StlChange#~' .. d.changed
+        end
+        if (d.removed or 0) > 0 then
+          diff[#diff + 1] = '%#StlDelete#-' .. d.removed
+        end
+        local out = branch
+        if #diff > 0 then
+          local sep = branch ~= '' and ' %#StlSep#│ ' or ''
+          out = out .. sep .. table.concat(diff, ' ')
+        end
+        return out
+      end
+
+      -- Minimal statusline: left = devicon + filename + unsaved flag,
+      -- right = git branch + diff (added/modified/deleted lines). Nothing else.
+      statusline.setup {
+        use_icons = vim.g.have_nerd_font,
+        content = {
+          active = function()
+            local mode, mode_hl = statusline.section_mode { trunc_width = 0 }
+            local search = statusline.section_searchcount { trunc_width = 0 }
+            local icon = ''
+            local has, devicons = pcall(require, 'nvim-web-devicons')
+            if has then
+              local name = vim.fn.expand '%:t'
+              local i = devicons.get_icon(name, vim.fn.expand '%:e', { default = true })
+              icon = i and (i .. ' ') or ''
+            end
+            local modified = vim.bo.modified and ' %#StlModified#●' or ''
+            -- path relative to cwd (where vim was opened), not home
+            local fname = vim.fn.fnamemodify(vim.fn.expand '%:p', ':.')
+            if fname == '' then
+              fname = '[No Name]'
+            end
+            fname = fname:gsub('%%', '%%%%') -- escape % for statusline
+            return table.concat {
+              '%#' .. mode_hl .. '# ', mode, ' ',
+              '%#StlFile#  ', icon, fname, modified,
+              search ~= '' and ('  %#StlSepDim#│  %#StlFile#' .. vim.fn.nr2char(0xf002) .. ' ' .. search) or '',
+              '%=', -- right align
+              git_right(), '  ',
+            }
+          end,
+        },
+      }
 
       -- Minimal start screen. Lightweight: keeps the statusline, only nudges
       -- the tabline while shown, and never blocks your keymaps — press
